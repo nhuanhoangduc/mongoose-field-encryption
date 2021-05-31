@@ -8,7 +8,8 @@ const kmsProviders = { local: { key: localMasterKey } };
 
 const { Schema } = mongoose;
 
-const URL = "mongodb://localhost:27017/dev";
+const URL =
+  "mongodb://mongodb0:27018,mongodb1:27019,mongodb2:27020/dev?replicaSet=rs0";
 
 main();
 
@@ -18,6 +19,7 @@ async function main() {
     useNewUrlParser: true,
   });
   try {
+    console.log("1");
     const clientEncryption = new ClientEncryption(
       unencryptedClient.getClient(),
       {
@@ -26,10 +28,11 @@ async function main() {
       }
     );
 
+    console.log("2");
     const dataKeyId = await clientEncryption.createDataKey("local");
 
     const schemaMap = {
-      "test.passports": {
+      "dev.passports": {
         bsonType: "object",
         properties: {
           passportId: {
@@ -44,6 +47,7 @@ async function main() {
     };
 
     try {
+      console.log("3");
       await mongoose.connect(URL, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
@@ -54,16 +58,21 @@ async function main() {
         },
       });
 
+      console.log("4");
+
       const Passport = mongoose.model(
         "passports",
         new Schema({
+          name: String,
           passportId: String, // String is shorthand for {type: String}
         })
       );
 
-      await Passport.create({ passportId: Date.now() });
-      await Passport.insertMany([{ passportId: Date.now() }]);
-      const res = await Passport.find();
+      console.log("5");
+
+      await Passport.create({ passportId: Date.now(), name: "nhuan" });
+      // await Passport.insertMany([{ passportId: Date.now(), name: "nhuan" }]);
+      const res = await Passport.aggregate([{ $match: { name: "nhuan" } }]);
       console.log(res);
 
       // await encryptedClient.connect();
@@ -76,6 +85,8 @@ async function main() {
     } catch (error) {
       console.log(error);
     }
+  } catch (error) {
+    console.log(error);
   } finally {
     await unencryptedClient.close();
   }
