@@ -54,7 +54,7 @@ async function main() {
         autoEncryption: {
           keyVaultNamespace,
           kmsProviders,
-          schemaMap,
+          bypassAutoEncryption: true,
         },
       });
 
@@ -64,16 +64,32 @@ async function main() {
         "passports",
         new Schema({
           name: String,
-          passportId: String, // String is shorthand for {type: String}
+          passportId: Buffer, // String is shorthand for {type: String}
         })
       );
 
       console.log("5");
 
-      await Passport.create({ passportId: Date.now(), name: "nhuan" });
+      await Passport.create({
+        name: "nhuan",
+        passportId: await clientEncryption.encrypt(Date.now().toString(), {
+          keyId: dataKeyId,
+          algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+        }),
+      });
       // await Passport.insertMany([{ passportId: Date.now(), name: "nhuan" }]);
       const res = await Passport.aggregate([{ $match: { name: "nhuan" } }]);
       console.log(res);
+      console.log("6");
+      await Passport.create({
+        name: "nhuan",
+        passportId: await clientEncryption.encrypt(Date.now().toString(), {
+          keyId: dataKeyId,
+          algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
+        }),
+      });
+      const res2 = await Passport.aggregate([{ $match: { name: "nhuan" } }]);
+      console.log(res2);
 
       // await encryptedClient.connect();
       // const res = await encryptedClient
