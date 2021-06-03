@@ -1,0 +1,7 @@
+version: "3.9" # optional since v1.27.0
+services:
+  server:
+    build: .
+    command: npm i -g mongodb-client-encryption
+    ports:
+      - "5000:5000"
