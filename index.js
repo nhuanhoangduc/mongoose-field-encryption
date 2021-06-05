@@ -2,14 +2,13 @@ const mongoose = require("mongoose");
 const fs = require("fs");
 const { ClientEncryption } = require("mongodb-client-encryption");
 
-const keyVaultNamespace = "admin.datakeys";
+const keyVaultNamespace = "dev.datakeys";
 const localMasterKey = fs.readFileSync("localMaster.key");
 const kmsProviders = { local: { key: localMasterKey } };
 
 const { Schema } = mongoose;
 
-const URL =
-  "mongodb://mongodb0:27018,mongodb1:27019,mongodb2:27020/dev?replicaSet=rs0";
+const URL = "mongodb+srv://admin:admin@gamerduo.b55ii.azure.mongodb.net/dev";
 
 main();
 
@@ -48,13 +47,17 @@ async function main() {
 
     try {
       console.log("3");
+      console.log("3");
+      console.log("3");
+      console.log("3");
+      console.log("3");
       await mongoose.connect(URL, {
         useUnifiedTopology: true,
         useNewUrlParser: true,
         autoEncryption: {
           keyVaultNamespace,
           kmsProviders,
-          bypassAutoEncryption: true,
+          schemaMap,
         },
       });
 
@@ -64,7 +67,7 @@ async function main() {
         "passports",
         new Schema({
           name: String,
-          passportId: Buffer, // String is shorthand for {type: String}
+          passportId: String, // String is shorthand for {type: String}
         })
       );
 
@@ -72,32 +75,10 @@ async function main() {
 
       await Passport.create({
         name: "nhuan",
-        passportId: await clientEncryption.encrypt(Date.now().toString(), {
-          keyId: dataKeyId,
-          algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
-        }),
-      });
-      // await Passport.insertMany([{ passportId: Date.now(), name: "nhuan" }]);
-      const res = await Passport.aggregate([{ $match: { name: "nhuan" } }]);
-      console.log(res);
-      console.log("6");
-      await Passport.create({
-        name: "nhuan",
-        passportId: await clientEncryption.encrypt(Date.now().toString(), {
-          keyId: dataKeyId,
-          algorithm: "AEAD_AES_256_CBC_HMAC_SHA_512-Deterministic",
-        }),
+        passportId: "123 123 123 123",
       });
       const res2 = await Passport.aggregate([{ $match: { name: "nhuan" } }]);
       console.log(res2);
-
-      // await encryptedClient.connect();
-      // const res = await encryptedClient
-      //   .db("test")
-      //   .collection("passports")
-      //   .find()
-      //   .toArray();
-      // console.log(res);
     } catch (error) {
       console.log(error);
     }

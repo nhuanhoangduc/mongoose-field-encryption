@@ -1,3 +1,3 @@
 Vagrant.configure("2") do |config|
-  config.vm.box = "centos/8"
+  config.vm.box = "generic/alpine311"
 end
